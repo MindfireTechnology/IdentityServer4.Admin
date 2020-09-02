@@ -82,17 +82,19 @@ services:
       - "AdminConfiguration__IdentityAdminBaseUrl=${ADMIN_URL}"
     # volumes:
     #   - "./shared/serilog.json:C:/app/serilog.json"
-    networks:
-      default:
-        aliases:
-          - 127.0.0.1.xip.io
+    #networks:
+    #  default:
+    #    aliases:
+    #      - 127.0.0.1.xip.io
+
   db:
     image: microsoft/mssql-server-windows-express
+    container_name: skoruba-identityserver4-db
+    hostname: db
     expose:
       - 1433
     ports:
       - 1433:1433
-    container_name: skoruba-identityserver4-db
     environment:
       SA_PASSWORD: "${DB_PASSWORD:-Password_123}"
       ACCEPT_EULA: "Y"

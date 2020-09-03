@@ -49,6 +49,9 @@ namespace Skoruba.IdentityServer4.STS.Identity
 			RegisterAuthorization(services);
 
 			services.AddIdSHealthChecks<IdentityServerConfigurationDbContext, IdentityServerPersistedGrantDbContext, AdminIdentityDbContext>(Configuration);
+
+			// This is required becuase Chrome is now blocking certain cookies
+			services.ConfigureNonBreakingSameSiteCookies();
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -58,6 +61,12 @@ namespace Skoruba.IdentityServer4.STS.Identity
 				app.UseDeveloperExceptionPage();
 				IdentityModelEventSource.ShowPII = true;
 			}
+
+			// This must be first
+			app.UseCookiePolicy(new CookiePolicyOptions
+			{
+				Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest
+			});
 
 			app.UseCors(policy => 
 			{

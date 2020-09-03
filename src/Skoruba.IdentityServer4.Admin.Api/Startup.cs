@@ -98,6 +98,9 @@ namespace Skoruba.IdentityServer4.Admin.Api
             services.AddAuditEventLogging<AdminAuditLogDbContext, AuditLog>(Configuration);
 
             services.AddIdSHealthChecks<IdentityServerConfigurationDbContext, IdentityServerPersistedGrantDbContext, AdminIdentityDbContext, AdminLogDbContext, AdminAuditLogDbContext>(Configuration, adminApiConfiguration);
+
+            // This is required becuase Chrome is now blocking certain cookies
+            services.ConfigureNonBreakingSameSiteCookies();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AdminApiConfiguration adminApiConfiguration)
@@ -107,6 +110,12 @@ namespace Skoruba.IdentityServer4.Admin.Api
                 app.UseDeveloperExceptionPage();
                 IdentityModelEventSource.ShowPII = true;
             }
+
+            // This must be first
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest
+            });
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

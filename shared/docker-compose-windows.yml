@@ -1,0 +1,286 @@
+version: '3.8'
+
+services:
+  Identityserver4.admin:
+    image: ${DOCKER_REGISTRY-}identityserver4-admin:rc1-windows
+    container_name: is4-admin
+    hostname: is4-admin
+    expose:
+      - 80 
+    ports:
+      - ${ADMIN_URL_PORT}:80
+    build:
+      context: Source
+      dockerfile: src/Skoruba.IdentityServer4.Admin/Dockerfile-windows
+    command: dotnet Skoruba.IdentityServer4.Admin.dll /seed
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development      
+      - "ConnectionStrings__ConfigurationDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__PersistedGrantDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__IdentityDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__AdminLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__AdminAuditLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__DataProtectionDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "SeedConfiguration__ApplySeed=true"
+      - "DatabaseMigrationsConfiguration__ApplyDatabaseMigrations=true"
+      - "DatabaseProviderConfiguration__ProviderType=SqlServer"
+      - "AdminConfiguration__PageTitle=Identity Server"
+      - "AdminConfiguration__FaviconUri=~/favicon.ico"
+      - "AdminConfiguration__IdentityAdminRedirectUri=${ADMIN_URL}/signin-oidc"
+      - "AdminConfiguration__IdentityServerBaseUrl=${BASE_URL}"
+      - "AdminConfiguration__RequireHttpsMetadata=true"
+      - "AdminConfiguration__IdentityAdminCookieName=IdentityServerAdmin"
+      - "AdminConfiguration__IdentityAdminCookieExpiresUtcHours=12"
+      - "AdminConfiguration__TokenValidationClaimName=name"
+      - "AdminConfiguration__TokenValidationClaimRole=role"
+      - "AdminConfiguration__ClientId=AdminClient"
+      - "AdminConfiguration__ClientSecret=ClientSecret123!"
+      - "AdminConfiguration__OidcResponseType=code"
+      - "AdminConfiguration__Scopes__0=openid"
+      - "AdminConfiguration__Scopes__1=profile"
+      - "AdminConfiguration__Scopes__2=email"
+      - "AdminConfiguration__Scopes__3=roles"
+      - "AdminConfiguration__AdministrationRole=Admin"
+      - "AdminConfiguration__HideUIForMSSqlErrorLogging=false"
+      - "SmtpConfiguration__Host="
+      - "SmtpConfiguration__Login="
+      - "SmtpConfiguration__Password="
+      - "SendGridConfiguration__ApiKey="
+      - "SendGridConfiguration__SourceEmail="
+      - "SendGridConfiguration__SourceName="
+      - "AuditLoggingConfiguration__Source=IdentityServer.Admin.Web"
+      - "AuditLoggingConfiguration__SubjectIdentifierClaim=sub"
+      - "AuditLoggingConfiguration__SubjectNameClaim=name"
+      - "AuditLoggingConfiguration__IncludeFormVariables=false"
+      - "BasePath="
+      - "IdentityOptions__Password__RequiredLength=8"
+      - "IdentityOptions__User__RequireUniqueEmail=true"
+      - "IdentityOptions__SignIn__RequireConfirmedAccount=false"
+
+      # identityserverdata.json
+      - "IdentityServerData__IdentityResources__0__Name=roles"
+      - "IdentityServerData__IdentityResources__0__Enabled=true"
+      - "IdentityServerData__IdentityResources__0__DisplayName=Roles"
+      - "IdentityServerData__IdentityResources__0__UserClaims__0=role"
+      - "IdentityServerData__IdentityResources__1__Name=openid"
+      - "IdentityServerData__IdentityResources__1__Enabled=true"
+      - "IdentityServerData__IdentityResources__1__DisplayName=Your user identifier"
+      - "IdentityServerData__IdentityResources__1__UserClaims__0=sub"
+      - "IdentityServerData__IdentityResources__2__Name=profile"
+      - "IdentityServerData__IdentityResources__2__Enabled=true"
+      - "IdentityServerData__IdentityResources__2__DisplayName=User profile"
+      - "IdentityServerData__IdentityResources__2__Description=Your user profile information (first name, last name, etc.)"
+      - "IdentityServerData__IdentityResources__2__Emphasize=true"
+      - "IdentityServerData__IdentityResources__2__UserClaims__0=name"
+      - "IdentityServerData__IdentityResources__2__UserClaims__1=family_name"
+      - "IdentityServerData__IdentityResources__2__UserClaims__2=given_name"
+      - "IdentityServerData__IdentityResources__2__UserClaims__3=middle_name"
+      - "IdentityServerData__IdentityResources__2__UserClaims__4=nickname"
+      - "IdentityServerData__IdentityResources__2__UserClaims__5=preferred_username"
+      - "IdentityServerData__IdentityResources__2__UserClaims__6=profile"
+      - "IdentityServerData__IdentityResources__2__UserClaims__7=picture"
+      - "IdentityServerData__IdentityResources__2__UserClaims__8=website"
+      - "IdentityServerData__IdentityResources__2__UserClaims__9=gender"
+      - "IdentityServerData__IdentityResources__2__UserClaims__10=birthdate"
+      - "IdentityServerData__IdentityResources__2__UserClaims__11=zoneinfo"
+      - "IdentityServerData__IdentityResources__2__UserClaims__12=locale"
+      - "IdentityServerData__IdentityResources__2__UserClaims__13=updated_at"
+      - "IdentityServerData__IdentityResources__3__Name=email"
+      - "IdentityServerData__IdentityResources__3__Enabled=true"
+      - "IdentityServerData__IdentityResources__3__DisplayName=Your email address"
+      - "IdentityServerData__IdentityResources__3__Emphasize=true"
+      - "IdentityServerData__IdentityResources__3__UserClaims__0=email"
+      - "IdentityServerData__IdentityResources__3__UserClaims__1=email_verified"
+      - "IdentityServerData__IdentityResources__4__Name=address"
+      - "IdentityServerData__IdentityResources__4__Enabled=true"
+      - "IdentityServerData__IdentityResources__4__DisplayName=Your address"
+      - "IdentityServerData__IdentityResources__4__Emphasize=true"
+      - "IdentityServerData__IdentityResources__4__UserClaims__0=address"
+
+      - "IdentityServerData__ApiResources__0__Name=AdminClient_api"
+      - "IdentityServerData__ApiResources__0__Scopes__0__Name=AdminClient_api"
+      - "IdentityServerData__ApiResources__0__Scopes__0__DisplayName=AdminClient_api"
+      - "IdentityServerData__ApiResources__0__Scopes__0__Required=true"
+      - "IdentityServerData__ApiResources__0__Scopes__0__UserClaims__0=role"
+      - "IdentityServerData__ApiResources__0__Scopes__0__UserClaims__1=name"
+      - "IdentityServerData__Clients__0__ClientId=AdminClient"
+      - "IdentityServerData__Clients__0__ClientName=AdminClient"
+      - "IdentityServerData__Clients__0__ClientUri=${ADMIN_URL}"
+      - "IdentityServerData__Clients__0__AllowedGrantTypes__0=authorization_code"
+      - "IdentityServerData__Clients__0__RequirePkce=true"
+      - "IdentityServerData__Clients__0__ClientSecrets__0__Value=ClientSecret123!"
+      - "IdentityServerData__Clients__0__RedirectUris__0=${ADMIN_URL}/signin-oidc"
+      - "IdentityServerData__Clients__0__FrontChannelLogoutUri=${ADMIN_URL}/signout-oidc"
+      - "IdentityServerData__Clients__0__PostLogoutRedirectUris__0=${ADMIN_URL}/signout-callback-oidc"
+      - "IdentityServerData__Clients__0__AllowedCorsOrigins__0=${ADMIN_URL}"
+      - "IdentityServerData__Clients__0__AllowedScopes__0=openid"
+      - "IdentityServerData__Clients__0__AllowedScopes__1=email"
+      - "IdentityServerData__Clients__0__AllowedScopes__2=profile"
+      - "IdentityServerData__Clients__0__AllowedScopes__3=roles"
+
+      - "IdentityServerData__Clients__1__ClientId=AdminClient_api_swaggerui"
+      - "IdentityServerData__Clients__1__ClientName=AdminClient_api_swaggerui"
+      - "IdentityServerData__Clients__1__AllowedGrantTypes__0=authorization_code"
+      - "IdentityServerData__Clients__1__RequireClientSecret=false"
+      - "IdentityServerData__Clients__1__RequirePkce=true"
+      - "IdentityServerData__Clients__1__RedirectUris__0=${ADMIN_API_URL}/swagger/oauth2-redirect.html"
+      - "IdentityServerData__Clients__1__AllowedScopes__0=AdminClient_api"
+      - "IdentityServerData__Clients__1__AllowedCorsOrigins__0=${ADMIN_API_URL}"
+
+      # identitydata.json
+      - "IdentityData__Roles__0__Name=Admin"
+      - "IdentityData__Users__0__Username=admin"
+      - "IdentityData__Users__0__Password=Pa$$word123"
+      - "IdentityData__Users__0__Email=nzaugg@gmail.com"
+      - "IdentityData__Users__0__Roles__0=Admin"
+      - "IdentityData__Users__0__Claims__0__Type=name"
+      - "IdentityData__Users__0__Claims__0__Value=admin"
+
+    volumes: 
+      - ./APPDATA/ASP.NET/Https:C:\Users\ContainerUser\AppData\Roaming\ASP.NET\Https:ro
+      - ./APPDATA/Microsoft/UserSecrets:C:\Users\ContainerUser\AppData\Roaming\Microsoft\UserSecrets:ro      
+    depends_on:
+      - db
+      - Identityserver4.sts.identity
+      - Identityserver4.admin.api
+    # volumes:
+    #   - "./shared/serilog.json:C:/app/serilog.json"
+    #   - "./shared/identitydata.json:C:/app/identitydata.json"
+    #   - "./shared/identityserverdata.json:C:/app/identityserverdata.json"
+
+  Identityserver4.admin.api:
+    image: ${DOCKER_REGISTRY-}identityserver4-admin-api:rc1-windows
+    container_name: is4-admin-api
+    hostname: is4-admin-api
+    build:
+      context: Source
+      dockerfile: src/Skoruba.IdentityServer4.Admin.Api/Dockerfile-windows
+    depends_on:
+      - db
+    expose:
+      - 80
+    ports:
+      - ${ADMIN_API_URL_PORT}:80
+    environment:
+      - "ConnectionStrings__ConfigurationDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__PersistedGrantDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__IdentityDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__AdminLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__AdminAuditLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__DataProtectionDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "DatabaseProviderConfiguration__ProviderType=SqlServer"
+      - "AdminApiConfiguration__ApiName=IdentityServer API"
+      - "AdminApiConfiguration__ApiVersion=v1"
+      - "AdminApiConfiguration__ApiBaseUrl=${ADMIN_API_URL}"
+      - "AdminApiConfiguration__IdentityServerBaseUrl=${BASE_URL}"
+      - "AdminApiConfiguration__RequireHttpsMetadata=true"
+      - "AdminApiConfiguration__OidcSwaggerUIClientId=AdminClient_api_swaggerui"
+      - "AdminApiConfiguration__OidcApiName=AdminClient_api"
+      - "AdminApiConfiguration__AdministrationRole=Admin"
+      - "AdminApiConfiguration__CorsAllowAnyOrigin=true"
+      - "AdminApiConfiguration__CorsAllowOrigins__0="
+      - "SmtpConfiguration__Host="
+      - "SmtpConfiguration__Login="
+      - "SmtpConfiguration__Password="
+      - "SendGridConfiguration__ApiKey="
+      - "SendGridConfiguration__SourceEmail="
+      - "SendGridConfiguration__SourceName="
+      - "AuditLoggingConfiguration__Source=IdentityServer.Admin.Web"
+      - "AuditLoggingConfiguration__SubjectIdentifierClaim=sub"
+      - "AuditLoggingConfiguration__SubjectNameClaim=name"
+      - "AuditLoggingConfiguration__IncludeFormVariables=false"
+      - "IdentityOptions__Password__RequiredLength=8"
+      - "IdentityOptions__User__RequireUniqueEmail=true"
+      - "IdentityOptions__SignIn__RequireConfirmedAccount=false"
+    volumes: 
+      - ./APPDATA/ASP.NET/Https:C:\Users\ContainerUser\AppData\Roaming\ASP.NET\Https:ro
+      - ./APPDATA/Microsoft/UserSecrets:C:\Users\ContainerUser\AppData\Roaming\Microsoft\UserSecrets:ro      
+    #   - "./shared/serilog.json:/app/serilog.json"
+
+  Identityserver4.sts.identity:
+    image: ${DOCKER_REGISTRY-}identityserver4-sts-identity:rc1-windows
+    container_name: is4-sts
+    hostname: is4-sts
+    expose:
+      - 80 
+    ports:
+      - ${BASE_URL_PORT}:80
+    build:
+      context: Source
+      dockerfile: src/Skoruba.IdentityServer4.STS.Identity/Dockerfile-windows
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "ConnectionStrings__ConfigurationDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__PersistedGrantDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__IdentityDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__AdminLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__AdminAuditLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__DataProtectionDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "DatabaseProviderConfiguration__ProviderType=SqlServer"
+      - "RegisterConfiguration__Enabled=true"
+      - "LoginConfiguration__ResolutionPolicy=Username"
+      - "CertificateConfiguration__UseTemporarySigningKeyForDevelopment=true"
+      - "CertificateConfiguration__CertificateStoreLocation=true"
+      - "CertificateConfiguration__UseSigningCertificateThumbprint=false"
+      - "CertificateConfiguration__SigningCertificateThumbprint="
+      - "CertificateConfiguration__UseSigningCertificatePfxFile=false"
+      - "CertificateConfiguration__SigningCertificatePfxFilePath="
+      - "CertificateConfiguration__SigningCertificatePfxFilePassword="
+      - "CertificateConfiguration__UseValidationCertificatePfxFile=false"
+      - "CertificateConfiguration__ValidationCertificatePfxFilePath="
+      - "CertificateConfiguration__ValidationCertificatePfxFilePassword="
+      - "CertificateConfiguration__UseValidationCertificateThumbprint=false"
+      - "CertificateConfiguration__ValidationCertificateThumbprint="
+      - "ExternalProvidersConfiguration__UseGitHubProvider=false"
+      - "ExternalProvidersConfiguration__GitHubClientId="
+      - "ExternalProvidersConfiguration__GitHubClientSecret="
+      - "SmtpConfiguration__Host="
+      - "SmtpConfiguration__Login="
+      - "SmtpConfiguration__Password="
+      - "SendGridConfiguration__ApiKey="
+      - "SendGridConfiguration__SourceEmail="
+      - "SendGridConfiguration__SourceName="
+      - "AdminConfiguration__PageTitle=IdentityServer4"
+      - "AdminConfiguration__HomePageLogoUri=~/images/skoruba-icon.png"
+      - "AdminConfiguration__FaviconUri=~/favicon.ico"
+      - "AdminConfiguration__IdentityAdminBaseUrl=${ADMIN_URL}"
+      - "AdminConfiguration__AdministrationRole=Admin"
+      - "AdvancedConfiguration__PublicOrigin="
+      - "IdentityOptions__Password__RequiredLength=8"
+      - "IdentityOptions__User__RequireUniqueEmail=true"
+      - "IdentityOptions__SignIn__RequireConfirmedAccount=false"
+    volumes: 
+      - ./APPDATA/ASP.NET/Https:C:\Users\ContainerUser\AppData\Roaming\ASP.NET\Https:ro
+      - ./APPDATA/Microsoft/UserSecrets:C:\Users\ContainerUser\AppData\Roaming\Microsoft\UserSecrets:ro      
+    #   - "./shared/serilog.json:C:/app/serilog.json"
+    #networks:
+    #  default:
+    #    aliases:
+    #      - 127.0.0.1.xip.io
+
+  db:
+    image: microsoft/mssql-server-windows-express
+    container_name: is4-db
+    hostname: db
+    isolation: hyperv
+    expose:
+      - 1433
+    ports:
+      - 1444:1433
+    environment:
+      SA_PASSWORD: "${DB_PASSWORD:-Password_123}"
+      ACCEPT_EULA: "Y"
+      ATTACH_DBs: '[{"dbName":"IdentityServer4Admin","dbFiles":["C:\\Data\\IdentityServer4Admin.mdf","C:\\Data\\IdentityServer4Admin.ldf"]}]'
+    volumes:
+      - ./Database:C:/Data
+
+# volumes:
+#   dbdata:
+#     driver: local
+
+# networks:
+#   default:
+#     external:
+#       name: nat

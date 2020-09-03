@@ -114,7 +114,7 @@ namespace Skoruba.IdentityServer4.Admin.Api
             // This must be first
             app.UseCookiePolicy(new CookiePolicyOptions
             {
-                Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest
+                Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always
             });
 
             app.UseSwagger();

@@ -65,7 +65,7 @@ namespace Skoruba.IdentityServer4.STS.Identity
 			// This must be first
 			app.UseCookiePolicy(new CookiePolicyOptions
 			{
-				Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest
+				Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always
 			});
 
 			app.UseCors(policy => 

@@ -94,7 +94,7 @@ namespace Skoruba.IdentityServer4.Admin
 
             // This must be first
             app.UseCookiePolicy(new CookiePolicyOptions{ 
-                Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest
+                Secure = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always
             });
 
             // Add custom security headers

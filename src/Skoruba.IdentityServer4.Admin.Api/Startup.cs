@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
 using Skoruba.AuditLogging.EntityFramework.Entities;
 using Skoruba.IdentityServer4.Admin.Api.Configuration;
@@ -104,6 +105,7 @@ namespace Skoruba.IdentityServer4.Admin.Api
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                IdentityModelEventSource.ShowPII = true;
             }
 
             app.UseSwagger();

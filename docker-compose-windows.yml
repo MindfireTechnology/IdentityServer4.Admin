@@ -1,8 +1,10 @@
 version: '3.4'
 
 services:
-  skoruba.identityserver4.admin:
+  Identityserver4.admin:
     image: ${DOCKER_REGISTRY-}identityserver4-admin:rc1-windows
+    container_name: is4-admin
+    hostname: is4-admin
     expose:
       - 80 
     ports:
@@ -10,7 +12,7 @@ services:
     build:
       context: .
       dockerfile: src/Skoruba.IdentityServer4.Admin/Dockerfile-windows
-    container_name: skoruba-identityserver4-admin
+    command: dotnet Skoruba.IdentityServer4.Admin.dll /seed
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings__ConfigurationDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
@@ -18,53 +20,107 @@ services:
       - "ConnectionStrings__IdentityDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
       - "ConnectionStrings__AdminLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
       - "ConnectionStrings__AdminAuditLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
-      - "AdminConfiguration__IdentityAdminBaseUrl=${ADMIN_URL}"
+      - "ConnectionStrings__DataProtectionDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "SeedConfiguration__ApplySeed=true"
+      - "DatabaseMigrationsConfiguration__ApplyDatabaseMigrations=true"
+      - "DatabaseProviderConfiguration__ProviderType=SqlServer"
+      - "AdminConfiguration__PageTitle=Identity Server"
+      - "AdminConfiguration__FaviconUri=~/favicon.ico"
       - "AdminConfiguration__IdentityAdminRedirectUri=${ADMIN_URL}/signin-oidc"
       - "AdminConfiguration__IdentityServerBaseUrl=${BASE_URL}"
       - "AdminConfiguration__RequireHttpsMetadata=false"
-      - "IdentityServerData__Clients__0__ClientUri=${ADMIN_URL}"
-      - "IdentityServerData__Clients__0__RedirectUris__0=${ADMIN_URL}/signin-oidc"
-      - "IdentityServerData__Clients__0__FrontChannelLogoutUri=${ADMIN_URL}/signin-oidc"
-      - "IdentityServerData__Clients__0__PostLogoutRedirectUris__0=${ADMIN_URL}/signout-callback-oidc"
-      - "IdentityServerData__Clients__0__AllowedCorsOrigins__0=${ADMIN_URL}"
-      - "IdentityServerData__Clients__1__RedirectUris__0=${ADMIN_API_URL}/swagger/oauth2-redirect.html"
-      - "Serilog__WriteTo__1__Args__connectionString=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
-    command: dotnet Skoruba.IdentityServer4.Admin.dll /seed
+      - "AdminConfiguration__IdentityAdminCookieName=IdentityServerAdmin"
+      - "AdminConfiguration__IdentityAdminCookieExpiresUtcHours=12"
+      - "AdminConfiguration__TokenValidationClaimName=name"
+      - "AdminConfiguration__TokenValidationClaimRole=role"
+      - "AdminConfiguration__ClientId=AdminClient"
+      - "AdminConfiguration__ClientSecret=ClientSecret123!"
+      - "AdminConfiguration__OidcResponseType=code"
+      - "AdminConfiguration__Scopes__0=openid"
+      - "AdminConfiguration__Scopes__1=profile"
+      - "AdminConfiguration__Scopes__2=email"
+      - "AdminConfiguration__Scopes__3=roles"
+      - "AdminConfiguration__AdministrationRole=Admin"
+      - "AdminConfiguration__HideUIForMSSqlErrorLogging=false"
+      - "SmtpConfiguration__Host="
+      - "SmtpConfiguration__Login="
+      - "SmtpConfiguration__Password="
+      - "SendGridConfiguration__ApiKey="
+      - "SendGridConfiguration__SourceEmail="
+      - "SendGridConfiguration__SourceName="
+      - "AuditLoggingConfiguration__Source=IdentityServer.Admin.Web"
+      - "AuditLoggingConfiguration__SubjectIdentifierClaim=sub"
+      - "AuditLoggingConfiguration__SubjectNameClaim=name"
+      - "AuditLoggingConfiguration__IncludeFormVariables=false"
+      - "BasePath="
+      - "IdentityOptions__Password__RequiredLength=8"
+      - "IdentityOptions__User__RequireUniqueEmail=true"
+      - "IdentityOptions__SignIn__RequireConfirmedAccount=false"
+    volumes: 
+      - ${APPDATA}/ASP.NET/Https:C:\Users\ContainerUser\AppData\Roaming\ASP.NET\Https:ro
+      - ${APPDATA}/Microsoft/UserSecrets:C:\Users\ContainerUser\AppData\Roaming\Microsoft\UserSecrets:ro      
     depends_on:
       - db
-      - skoruba.identityserver4.sts.identity
+      - Identityserver4.sts.identity
+      - Identityserver4.admin.api
     # volumes:
     #   - "./shared/serilog.json:C:/app/serilog.json"
     #   - "./shared/identitydata.json:C:/app/identitydata.json"
     #   - "./shared/identityserverdata.json:C:/app/identityserverdata.json"
 
-  skoruba.identityserver4.admin.api:
+  Identityserver4.admin.api:
     image: ${DOCKER_REGISTRY-}identityserver4-admin-api:rc1-windows
+    container_name: is4-admin-api
+    hostname: is4-admin-api
     build:
       context: .
       dockerfile: src/Skoruba.IdentityServer4.Admin.Api/Dockerfile-windows
     depends_on:
       - db
     expose:
-      - 80 
+      - 80
     ports:
       - ${ADMIN_API_URL_PORT}:80
     environment:
-      - "AdminApiConfiguration__RequireHttpsMetadata=false"
-      - "AdminApiConfiguration__ApiBaseUrl=${ADMIN_API_URL}"
-      - "AdminApiConfiguration__IdentityServerBaseUrl=${BASE_URL}"
       - "ConnectionStrings__ConfigurationDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
       - "ConnectionStrings__PersistedGrantDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
       - "ConnectionStrings__IdentityDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
       - "ConnectionStrings__AdminLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
       - "ConnectionStrings__AdminAuditLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
-    container_name: skoruba-identityserver4-admin-api
-    # volumes:
+      - "ConnectionStrings__DataProtectionDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "DatabaseProviderConfiguration__ProviderType=SqlServer"
+      - "AdminApiConfiguration__ApiName=IdentityServer API"
+      - "AdminApiConfiguration__ApiVersion=v1"
+      - "AdminApiConfiguration__ApiBaseUrl=${ADMIN_API_URL}"
+      - "AdminApiConfiguration__IdentityServerBaseUrl=${BASE_URL}"
+      - "AdminApiConfiguration__RequireHttpsMetadata=false"
+      - "AdminApiConfiguration__OidcSwaggerUIClientId=AdminClient_api_swaggerui"
+      - "AdminApiConfiguration__OidcApiName=AdminClient_api"
+      - "AdminApiConfiguration__AdministrationRole=Admin"
+      - "AdminApiConfiguration__CorsAllowAnyOrigin=true"
+      - "AdminApiConfiguration__CorsAllowOrigins__0="
+      - "SmtpConfiguration__Host="
+      - "SmtpConfiguration__Login="
+      - "SmtpConfiguration__Password="
+      - "SendGridConfiguration__ApiKey="
+      - "SendGridConfiguration__SourceEmail="
+      - "SendGridConfiguration__SourceName="
+      - "AuditLoggingConfiguration__Source=IdentityServer.Admin.Web"
+      - "AuditLoggingConfiguration__SubjectIdentifierClaim=sub"
+      - "AuditLoggingConfiguration__SubjectNameClaim=name"
+      - "AuditLoggingConfiguration__IncludeFormVariables=false"
+      - "IdentityOptions__Password__RequiredLength=8"
+      - "IdentityOptions__User__RequireUniqueEmail=true"
+      - "IdentityOptions__SignIn__RequireConfirmedAccount=false"
+    volumes: 
+      - ${APPDATA}/ASP.NET/Https:C:\Users\ContainerUser\AppData\Roaming\ASP.NET\Https:ro
+      - ${APPDATA}/Microsoft/UserSecrets:C:\Users\ContainerUser\AppData\Roaming\Microsoft\UserSecrets:ro      
     #   - "./shared/serilog.json:/app/serilog.json"
 
-  skoruba.identityserver4.sts.identity:
+  Identityserver4.sts.identity:
     image: ${DOCKER_REGISTRY-}identityserver4-sts-identity:rc1-windows
-    container_name: skoruba-identityserver4-sts-identity
+    container_name: is4-sts
+    hostname: is4-sts
     expose:
       - 80 
     ports:
@@ -79,8 +135,45 @@ services:
       - "ConnectionStrings__ConfigurationDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
       - "ConnectionStrings__PersistedGrantDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
       - "ConnectionStrings__IdentityDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__AdminLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__AdminAuditLogDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "ConnectionStrings__DataProtectionDbConnection=Server=db;Database=IdentityServer4Admin;User Id=sa;Password=${DB_PASSWORD:-Password_123};MultipleActiveResultSets=true"
+      - "DatabaseProviderConfiguration__ProviderType=SqlServer"
+      - "RegisterConfiguration__Enabled=true"
+      - "LoginConfiguration__ResolutionPolicy=Username"
+      - "CertificateConfiguration__UseTemporarySigningKeyForDevelopment=true"
+      - "CertificateConfiguration__CertificateStoreLocation=true"
+      - "CertificateConfiguration__UseSigningCertificateThumbprint=false"
+      - "CertificateConfiguration__SigningCertificateThumbprint="
+      - "CertificateConfiguration__UseSigningCertificatePfxFile=false"
+      - "CertificateConfiguration__SigningCertificatePfxFilePath="
+      - "CertificateConfiguration__SigningCertificatePfxFilePassword="
+      - "CertificateConfiguration__UseValidationCertificatePfxFile=false"
+      - "CertificateConfiguration__ValidationCertificatePfxFilePath="
+      - "CertificateConfiguration__ValidationCertificatePfxFilePassword="
+      - "CertificateConfiguration__UseValidationCertificateThumbprint=false"
+      - "CertificateConfiguration__ValidationCertificateThumbprint="
+      - "ExternalProvidersConfiguration__UseGitHubProvider=false"
+      - "ExternalProvidersConfiguration__GitHubClientId="
+      - "ExternalProvidersConfiguration__GitHubClientSecret="
+      - "SmtpConfiguration__Host="
+      - "SmtpConfiguration__Login="
+      - "SmtpConfiguration__Password="
+      - "SendGridConfiguration__ApiKey="
+      - "SendGridConfiguration__SourceEmail="
+      - "SendGridConfiguration__SourceName="
+      - "AdminConfiguration__PageTitle=IdentityServer4"
+      - "AdminConfiguration__HomePageLogoUri=~/images/skoruba-icon.png"
+      - "AdminConfiguration__FaviconUri=~/favicon.ico"
       - "AdminConfiguration__IdentityAdminBaseUrl=${ADMIN_URL}"
-    # volumes:
+      - "AdminConfiguration__AdministrationRole=Admin"
+      - "AdvancedConfiguration__PublicOrigin="
+      - "IdentityOptions__Password__RequiredLength=8"
+      - "IdentityOptions__User__RequireUniqueEmail=true"
+      - "IdentityOptions__SignIn__RequireConfirmedAccount=false"
+    volumes: 
+      - ${APPDATA}/ASP.NET/Https:C:\Users\ContainerUser\AppData\Roaming\ASP.NET\Https:ro
+      - ${APPDATA}/Microsoft/UserSecrets:C:\Users\ContainerUser\AppData\Roaming\Microsoft\UserSecrets:ro      
     #   - "./shared/serilog.json:C:/app/serilog.json"
     #networks:
     #  default:
@@ -89,22 +182,24 @@ services:
 
   db:
     image: microsoft/mssql-server-windows-express
-    container_name: skoruba-identityserver4-db
+    container_name: is4-db
     hostname: db
     expose:
       - 1433
     ports:
-      - 1433:1433
+      - 1444:1433
     environment:
       SA_PASSWORD: "${DB_PASSWORD:-Password_123}"
       ACCEPT_EULA: "Y"
+      ATTACH_DBs: '[{"dbName":"IdentityServer4Admin","dbFiles":["C:\\Data\\IdentityServer4Admin.mdf","C:\\Data\\IdentityServer4Admin.ldf"]}]'
     volumes:
-      - dbdata:C:/Data
+      - ./Database:C:/Data
 
-volumes:
-  dbdata:
-    driver: local
+# volumes:
+#   dbdata:
+#     driver: local
 
 # networks:
 #   default:
-#     driver: bridge
+#     external:
+#       name: nat

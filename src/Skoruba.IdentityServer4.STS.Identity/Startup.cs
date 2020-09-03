@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.IdentityServer4.STS.Identity.Configuration;
@@ -55,6 +56,7 @@ namespace Skoruba.IdentityServer4.STS.Identity
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
+				IdentityModelEventSource.ShowPII = true;
 			}
 
 			app.UseCors(policy => 

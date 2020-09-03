@@ -15,6 +15,7 @@ using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.IdentityServer4.Admin.Helpers;
 using Skoruba.IdentityServer4.Admin.Configuration;
 using Skoruba.IdentityServer4.Admin.Configuration.Constants;
+using Microsoft.IdentityModel.Logging;
 
 namespace Skoruba.IdentityServer4.Admin
 {
@@ -81,6 +82,7 @@ namespace Skoruba.IdentityServer4.Admin
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                IdentityModelEventSource.ShowPII = true;
             }
             else
             {
